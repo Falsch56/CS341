@@ -1,0 +1,64 @@
+Script started on Tue 18 Apr 2017 01:51:34 AM EDT
+tuser@tutor-vserver:~/mp3imp$ mtip -f testpack.n[Klnx
+For command help, type ~?
+For help on args, rerun without args
+Code starts at 0x100100
+Using board # 1 
+~downloading testpack.lnx
+
+.......Done.
+
+Download done, setting EIP to 100100.
+Tutor> go 100100
+querytimer: precision 1 us
+---------------------------------------------------------
+First show that the provided timepack *can* keep time
+---------------------------------------------------------
+
+wait about 1 seconds (1000000 us)
+starttimer returned T_OK
+timer counted 988657 us 
+stoptimer returned T_OK
+
+wait about 2 seconds (2000000 us)
+starttimer returned T_OK
+timer counted 2087165 us 
+stoptimer returned T_OK
+
+wait about 3 seconds (3000000 us)
+starttimer returned T_OK
+timer counted 3020897 us 
+stoptimer returned T_OK
+
+---------------------------------------------------------
+Now do the harder test: can it measure 10ms? 20ms?
+Answer: only after timepack is made more accurate.
+---------------------------------------------------------
+
+wait about 10 ms (10000 us)
+starttimer returned T_OK
+timer counted 0 us 
+stoptimer returned T_OK
+
+wait about 20 ms (20000 us)
+starttimer returned T_OK
+timer counted 0 us 
+stoptimer returned T_OK
+
+wait about 30 ms (30000 us)
+starttimer returned T_OK
+timer counted 0 us 
+stoptimer returned T_OK
+
+stop stopped clock
+stoptimer returned T_OK
+Exception 3 at EIP=00100110: Breakpoint
+Tutor> 
+Tutor> 
+Quit handler: 
+killing process 2032 Leaving board #1
+tuser@tutor-vserver:~/mp3imp$ ^C
+tuser@tutor-vserver:~/mp3imp$ exit
+exit
+
+Script done on Tue 18 Apr 2017 01:52:05 AM EDT

@@ -1,0 +1,489 @@
+Script started on Thu 16 Feb 2017 04:14:40 AM EST
+tuser@tutor-vserver:~/mp1$ exitssh sfenton@users.cs.umb.edu
+sfenton@users.cs.umb.edu's password: 
+Welcome to Ubuntu 16.04.1 LTS (GNU/Linux 4.4.0-59-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/advantage
+
+0 packages can be updated.
+0 updates are security updates.
+
+
+No mail.
+Last login: Thu Feb 16 04:14:07 2017 from 73.253.3.253
+sfenton@itserver6:~$ cd cs341/mp1
+sfenton@itserver6:~/cs341/mp1$ ls -l[Kal
+total 86
+drwxrwsr-x  2 sfenton cs341-1G   512 Feb 16 04:14 .
+drwxrws---  4 sfenton cs341-1G   512 Feb  1 11:43 ..
+-rw-r--r--+ 1 sfenton cs341-1G  5737 Feb 16 04:01 cmds.c
+-rw-r--r--  1 sfenton cs341-1G  2863 Feb 16 02:49 discussion.txt
+-rw-r--r--  1 sfenton cs341-1G  2772 Feb  1 08:25 makefile
+-rw-r--r--  1 sfenton cs341-1G 50688 Feb  1 08:25 mp1.doc
+-rw-r--r--  1 sfenton cs341-1G 12533 Feb  1 08:25 Rubric.docx
+-rw-r--r--  1 sfenton cs341-1G  2392 Feb  1 08:25 slex.c
+-rw-r--r--  1 sfenton cs341-1G  1846 Feb  1 08:25 slex.h
+-rw-r--r--  1 sfenton cs341-1G  2210 Feb  1 08:25 tutor.c
+-rw-r--r--  1 sfenton cs341-1G   162 Feb 16 04:06 typescript
+sfenton@itserver6:~/cs341/mp1$ cat cmds.c
+/*Scott Fenton
+* MP1
+* 2/16/2017
+*/
+
+
+/******************************************************************
+*
+*   file:     cmds.c
+*   author:   betty o'neil
+*   date:     ?
+*
+*   semantic actions for commands called by tutor (cs341, hw2)
+*
+*   revisions:
+*      9/90  eb   cleanup, convert function declarations to ansi
+*      9/91  eb   changes so that this can be used for hw1
+*      9/02  re   minor changes to quit command
+*/
+/* the Makefile arranges that #include <..> searches in the right
+   places for these headers-- 200920*/
+
+#include <stdio.h>
+#include <stdlib.h> 
+#include "slex.h"
+#pragma GCC diagnostic ignored "-Wint-conversion"
+/*===================================================================*
+*
+*   Command table for tutor program -- an array of structures of type
+*   cmd -- for each command provide the token, the function to call when
+*   that token is found, and the help message.
+*
+*   slex.h contains the typdef for struct cmd, and declares the
+*   cmds array as extern to all the other parts of the program.
+*   Code in slex.c parses user input command line and calls the
+*   requested semantic action, passing a pointer to the cmd struct
+*   and any arguments the user may have entered.
+*
+*===================================================================*/
+
+PROTOTYPE int stop(Cmd *cp, char *arguments);
+PROTOTYPE int mem_display(Cmd *cp, char *arguments);
+PROTOTYPE int mem_set(Cmd *cp, char *arguments);
+PROTOTYPE int help(Cmd *cp, char *arguments);
+PROTOTYPE int display_hex(char s[],char hex[], int hexpos);
+/* command table */
+
+Cmd cmds[] = {{"md",  mem_display, "Memory display: MD<addr>"},
+	      {"ms",  mem_set,     "Memory set: MS<addr><value>"},
+              {"s",   stop,        "Stop" },
+	      {"h",   help,        "Help: H<command>"},
+              {NULL,  NULL,        NULL}};  /* null cmd to flag end of table */
+
+char xyz = 6;  /* test global variable  */
+char *pxyz = &xyz;  /* test pointer to xyz */
+/*===================================================================*
+*		command			routines
+*
+*   Each command routine is called with 2 args, the remaining
+*   part of the line to parse and a pointer to the struct cmd for this
+*   command. Each returns 0 for continue or 1 for all-done.
+*
+*===================================================================*/
+
+int stop(Cmd *cp, char *arguments)
+{
+  return 1;			/* all done flag */
+}
+
+/*===================================================================*
+*
+*   mem_display: display contents of 16 bytes in hex
+*
+*/
+
+/*
+*Convert the character string(arguments) to an integer - CHECK
+*Use that integer as an address(a pointer to memory) - CHECK
+*Find the contents of that address - CHECK
+*Display the contents of that address to the terminal - CHECK
+*/
+int mem_display(Cmd *cp, char *arguments)
+{
+ unsigned int *y;
+ unsigned int memcon, memcon1,memcon2,memcon3,number;
+ char s[100],s1[100],s2[100],s3[100];
+ char hexlist[100];
+ int hexpos = 0,i = 0, gg, ggg;
+ char temp[3];
+ 
+ sscanf(arguments, "%x", &number); 
+
+ y = number;//memory address of integer
+ memcon = *y;
+ memcon1 = *(y+1);
+ memcon2 = *(y+2);
+ memcon3 = *(y+3);
+ sprintf(s, "%x", memcon);//convert integer to hex string
+ sprintf(s1, "%x", memcon1);
+ sprintf(s2, "%x", memcon2);
+ sprintf(s3, "%x", memcon3);
+ 
+ display_hex(s, hexlist, hexpos);
+ hexpos += 12;
+ display_hex(s1, hexlist, hexpos);
+ hexpos += 12;
+ display_hex(s2, hexlist, hexpos);
+ hexpos += 12;
+ display_hex(s3, hexlist, hexpos);
+
+ printf("00%s   %s", arguments+1, hexlist);
+ for(;i<=48;i=i+3){
+   temp[0] = hexlist[i];
+   temp[1] = hexlist[i+1];
+   sscanf(temp, "%x", &gg);
+   ggg =gg;
+   if(gg > 32 && gg < 127)
+   	printf("%c", ggg);
+   else
+	printf(".");
+}
+ printf("\n");
+ 
+  return 0;			/* not done */
+}
+
+int display_hex(char s[], char hexlist[],int hexpos){
+ int index = 0;
+ int rem = 8;
+ int space = 2;
+ for(;s[index] != '\0'; index++)
+   ;
+ rem = rem - index;//remaining 0's to fill
+ index--;
+ //capture two at once
+ for(;index >=0;index=index - 2,space=space-2){
+   if(space == 0){
+     //printf(" ");
+     space = 2;
+     hexlist[hexpos++] = ' ';
+}  if(index == 0){
+    //printf("0%c", s[index]);
+    rem--;
+    hexlist[hexpos++] = '0';
+    hexlist[hexpos++] = s[index]; 
+}
+   else{
+    //printf("%c%c", s[index-1],s[index]);
+    hexlist[hexpos++] = s[index-1];
+    hexlist[hexpos++] = s[index];
+}
+}
+ for(;rem >0; rem--,space--){
+  if(space == 0){
+    //printf(" ");
+    hexlist[hexpos++] = ' ';
+    space = 2;}
+  //printf("0");
+  hexlist[hexpos++] = '0';
+}
+ //printf(" ");
+ hexlist[hexpos++] = ' ';
+ return 0;
+
+}
+//Set one byte in memory
+int mem_set(Cmd *cp, char *arguments)
+{
+ unsigned int number, hexnnum, memcon;
+ unsigned int *y;
+ char s[100];
+ char mem[] = {arguments[8],arguments[9]};
+ char hexlist[100], temp[100];
+ int hexpos = 0, i =10, g = 0;
+
+ sscanf(arguments, "%x", &number);
+ y = number;
+ memcon = *y;
+ sprintf(s, "%x", memcon);
+ display_hex(s, hexlist, hexpos);
+ 		
+ hexlist[0] = mem[0],hexlist[1] = mem[1];
+ 
+ for(;i >=0; i=i-3,g=g+2){
+        
+	temp[g] = hexlist[i-1];
+        temp[g+1] = hexlist[i];
+        if(i == 1)
+		break;
+}
+ 
+ sscanf(temp, "%x", &hexnnum);
+ *y = hexnnum; 
+ printf(" ");
+ return 0;
+}
+
+
+//Complete and working
+int help(Cmd *cp, char *arguments){
+ 
+ if(arguments[0] == '\0')
+	printf("Memory display:    MD <addr>\n"
+	       "Memory set:        MS<addr><value>\n"
+	       "Stop:              s\n"
+	       "Help:              H<command>\n");
+ else if(arguments[1] == 's' || arguments[1] == 'S')
+	printf("Stop: s\n");
+ else if(arguments[1] == 'm' && arguments[2] == 'd')
+	printf("Memory display: MD<addr>\n");
+ else if(arguments[1] == 'm' && arguments[2] == 's')
+	printf("Memory set: MS<addr><value>\n");
+ else
+       printf("Invalid Command\n"); 
+
+ return 0;
+}
+sfenton@itserver6:~/cs341/mp1$ cat tutor.c
+/******************************************************************
+*
+*   file:     tutor.c
+*   author:   eb
+*   date:     September, 1990
+*
+*   Driver for a "tutor" program to mimic and extend the MECB ROM TUTOR.
+* 
+*   built from betty o'neil's previous version
+*
+*   revisions:
+*   Jan '96: changed prompt to PC-tutor, now mimics floppy-based Tutor
+*/
+
+#include <stdio.h>
+#include "slex.h" 
+/* The preprocessor symbol SAPC is #defined in $pcinc/stdio.h.  This
+ * stdio.h is found by i386-gcc because of the -I flag in its compile command
+ * in the Makefile.  In the UNIX case, there is no such redirection,
+ * so the ordinary stdio.h is used, and it has no SAPC definition.
+ */
+#ifdef SAPC
+#define PROMPT "PC-tutor> "
+#else
+#define PROMPT "UNIX-tutor> "
+#endif
+int main(void);
+
+int main()
+{
+  int done = 0;
+  int cnum,linepos;
+  char linebuf[LINELEN];
+  Cmd *cp;
+
+  printf("     cmd    help message\n");
+  for(cp = cmds; cp->cmdtoken; cp++) 
+      printf("%8s    %s\n", cp->cmdtoken, cp->help);
+
+  while (!done) {
+    /* get cmd token from user by parsing first part of line in linebuf-- */
+    getcmd(linebuf,&cnum,&linepos);
+    /* call implementation routine for matched cmd-- */
+    /* (remaining part of line to parse starts at linebuf+linepos) */
+    done = cmds[cnum].cmdfn(&cmds[cnum], linebuf+linepos); 
+  }
+  return 0;
+}
+
+/***********************************************************************
+*
+*  getcmd 
+*
+* Better than scanf--read whole line in, parse resulting string.
+* Uses slex package to match cmd token in first part of linebuf 
+* and return command # and where to continue parsing.
+* Getcmd loops until user provides proper command, so no error return.
+*/
+void getcmd(char *linebuf, 
+             int *cnum_ptr,   /* returned command number */
+             int *pos_ptr     /* position in linebuf (after cmd token) */
+           )
+{
+  int done = 0;
+
+  while (!done) {
+     printf( PROMPT );
+     gets(linebuf);		/* read line from user, null terminate */
+     /* match cmd token to get cnum--call slex package to do lookup-- */
+     if (slex( linebuf, cmds, cnum_ptr, pos_ptr)==0) 
+         done = 1;	/* success in matching cmd */
+     else
+         printf(" No such command\n");
+  }
+}
+sfenton@itserver6:~/cs341/mp1$ cat slex.c
+/******************************************************************
+*
+*   file:   slex.c
+*   author: betty o'neil
+*   date:   ?
+*
+*   simple lexical analyzer, front part of a parser                   
+*   --compare to UNIX tool "lex", general lexical analyzer            
+*   gets a (space-delimited) token from linebuf and tries to match    
+*   it to one of the cmdtokens in the provided cmdtable             
+*
+*   accepts:       
+*         linebuf--string to get token from                         
+*         cmdtable--cmdtable to use                                 
+*   returns:                                                          
+*         *cnum_ptr--command # (offset in cmdtable) or -1 if no match
+*         *pos_ptr--new place in linebuf after token match          
+*
+*   improvements needed:
+*         make token matching case independent
+*         skip whitespace, not just blanks
+*
+*   revisions: 
+*     9/90 cleanup, convert function headers to ansi form
+*
+*/
+
+#include <stdio.h>
+#include <string.h>
+#include "slex.h"		/* for definition of type cmd */
+
+int slex(char *linebuf,    /* string from user */
+         Cmd cmdtable[],   /* cmd table to use */
+         int *cnum_ptr,    /* returned command number */
+         int *pos_ptr)      /* returned new place in linebuf */
+{
+  int i = 0;
+  char token[MAXTOKENLEN];
+  int newpos;
+
+  if (gettoken(linebuf,token,&newpos)<0) /* get token from linebuf */
+    return -1;			/* couldn't find token */
+
+  while ((cmdtable[i].cmdtoken != NULL)) {
+    if (strcmp(cmdtable[i].cmdtoken,token)==0) {
+	*cnum_ptr = i;		/* success--return command # */
+	*pos_ptr = newpos;	/* and where we got to in linebuf */
+	return 0;
+    }
+    else
+      i++;			/* keep scanning table */
+  }
+  return -1;			/* no match */
+}
+
+/******************************************************************
+ * get one space-delimited token from string in linebuf, also return 
+ * new position in string 
+ */
+int gettoken(char *linebuf, char *token, int *pos_ptr)
+{
+  int i = 0;
+  int j = 0;
+
+  while (linebuf[i] == ' ')
+    i++;			/* skip blanks */
+  while (linebuf[i] != ' '&&linebuf[i]!='\0')
+    token[j++] = linebuf[i++];	/* copy chars to token */
+  if (j==0)
+    return -1;			/* nothing there */
+  else
+    {
+      token[j] = '\0';		/* null-terminate token */
+      *pos_ptr = i;		/* return place in linebuf we got to */
+      return 0;			/* success */
+    }
+}
+sfenton@itserver6:~/cs341/mp1$ make clean
+rm -f *.o *.opc *.syms *.usyms *.lnx tutor core syms usyms
+sfenton@itserver6:~/cs341/mp1$ make tutor
+gcc -Wall -Wno-implicit -Wshadow -g -I/home/sfenton/cs341/mp1   -c -o /home/sfenton/cs341/mp1/tutor.o /home/sfenton/cs341/mp1/tutor.c
+gcc -Wall -Wno-implicit -Wshadow -g -I/home/sfenton/cs341/mp1   -c -o /home/sfenton/cs341/mp1/slex.o /home/sfenton/cs341/mp1/slex.c
+gcc -Wall -Wno-implicit -Wshadow -g -I/home/sfenton/cs341/mp1   -c -o cmds.o cmds.c
+gcc -g -o tutor /home/sfenton/cs341/mp1/tutor.o /home/sfenton/cs341/mp1/slex.o cmds.o
+/home/sfenton/cs341/mp1/tutor.o: In function `getcmd':
+/home/sfenton/cs341/mp1/tutor.c:68: warning: the `gets' function is dangerous and should not be used.
+rm -f usyms; nm -vpt x tutor > usyms
+sfenton@itserver6:~/cs341/mp1$ ssh ulab
+sfenton@ulab's password: 
+Last login: Thu Feb 16 04:11:37 2017 from itserver6.cs.um
+cd cs341/mp1
+Sun Microsystems Inc.   SunOS 5.8       Generic 64-bit  February 2000
+
+ Welcome to blade57.cs.umb.edu, a SunBlade 100 (uIIe-S128)
+
+                    Authorized users only.
+
+make
+[3g        H        H        H        H        H        H        H        H        HChecking the msgs bulletin board:
+There are new messages.
+blade57(1)% cd cs341/mp1
+blade57(2)% make
+/groups/ulab/bin/i386-gcc -Wall -Wno-implicit -Wshadow -I/groups/ulab/pcdev/include -I/home/sfenton/cs341/mp1 -c -o cmds.opc cmds.c
+cmds.c: In function `mem_display':
+cmds.c:93: warning: assignment makes pointer from integer without a cast
+cmds.c: In function `mem_set':
+cmds.c:177: warning: assignment makes pointer from integer without a cast
+/groups/ulab/bin/i386-gcc -Wall -Wno-implicit -Wshadow -I/groups/ulab/pcdev/include -I/home/sfenton/cs341/mp1 -c -o /home/sfenton/cs341/mp1/tutor.opc /home/sfenton/cs341/mp1/tutor.c
+/groups/ulab/bin/i386-gcc -Wall -Wno-implicit -Wshadow -I/groups/ulab/pcdev/include -I/home/sfenton/cs341/mp1 -c -o /home/sfenton/cs341/mp1/slex.opc /home/sfenton/cs341/mp1/slex.c
+/groups/ulab/bin/i386-ld -N -Ttext 1000e0 -o tutor.lnx \
+        /groups/ulab/pcdev/lib/startup0.opc /groups/ulab/pcdev/lib/startup.opc \
+        /home/sfenton/cs341/mp1/tutor.opc /home/sfenton/cs341/mp1/slex.opc cmds.opc /groups/ulab/pcdev/lib/libc.a
+rm -f syms;/groups/ulab/bin/i386-nm -n tutor.lnx>syms
+blade57(3)% exit
+logout
+Connection to ulab closed.
+sfenton@itserver6:~/cs341/mp1$ exit
+logout
+Connection to users.cs.umb.edu closed.
+tuser@tutor-vserver:~/mp1$ mtip -f tutor.lnx
+For command help, type ~?
+For help on args, rerun without args
+Code starts at 0x100100
+Using board # 1 
+~downloading tutor.lnx
+.........Done.
+
+Download done, setting EIP to 100100.
+Tutor> go 100100
+     cmd    help message
+      md    Memory display: MD<addr>
+      ms    Memory set: MS<addr><value>
+       s    Stop
+       h    Help: H<command>
+PC-tutor> h
+Memory display:    MD <addr>
+Memory set:        MS<addr><value>
+Stop:              s
+Help:              H<command>
+PC-tutor> h md
+Memory display: MD<addr>
+PC-tutor> h s
+Stop: s
+PC-tutor> h ms
+Memory set: MS<addr><value>
+PC-tutor> h
+Memory display:    MD <addr>
+Memory set:        MS<addr><value>
+Stop:              s
+Help:              H<command>
+PC-tutor> md 100100
+00100100   bc f0 ff 3f 00 bd 00 00 00 00 e8 01 00 00 00 cc ...?.............
+PC-tutor> ms 100100 10
+ PC-tutor> md 100100
+00100100   10 f0 ff 3f 00 bd 00 00 00 00 e8 01 00 00 00 cc ...?.............
+PC-tutor> s
+Exception 3 at EIP=00100110: Breakpoint
+Tutor> 
+Tutor> 
+Quit handler: 
+killing process 2045 Leaving board #1
+tuser@tutor-vserver:~/mp1$ exit
+exit
+
+Script done on Thu 16 Feb 2017 04:16:31 AM EST
